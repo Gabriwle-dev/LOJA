@@ -186,22 +186,40 @@ if ($busca !== "") {
 
 <meta charset="UTF-8">
 
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
 <title>Gerenciar Clientes</title>
 
 <style>
 
+* {
+
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+}
+
 body {
 
-    font-family: Arial;
+    font-family: Arial, sans-serif;
 
-    background: #f4f4f4;
+    background: #f4f6f9;
 
-    padding: 40px;
+    min-height: 100vh;
+
+    padding: 20px;
 }
 
 .container {
 
-    max-width: 1000px;
+    width: 100%;
+
+    max-width: 1400px;
 
     margin: auto;
 
@@ -209,9 +227,9 @@ body {
 
     padding: 30px;
 
-    border-radius: 10px;
+    border-radius: 12px;
 
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 
 h2 {
@@ -219,26 +237,35 @@ h2 {
     text-align: center;
 
     margin-bottom: 30px;
+
+    color: #333;
+}
+
+form {
+
+    width: 100%;
 }
 
 input {
 
     width: 100%;
 
-    padding: 10px;
+    padding: 12px;
 
     margin-bottom: 15px;
 
     border: 1px solid #ccc;
 
-    border-radius: 5px;
+    border-radius: 8px;
 
-    box-sizing: border-box;
+    font-size: 15px;
 }
 
 button {
 
-    padding: 12px 20px;
+    width: 100%;
+
+    padding: 14px;
 
     background: #007bff;
 
@@ -246,11 +273,15 @@ button {
 
     border: none;
 
-    border-radius: 5px;
+    border-radius: 8px;
 
     cursor: pointer;
 
-    margin-bottom: 15px;
+    font-size: 16px;
+
+    transition: 0.3s;
+
+    margin-bottom: 10px;
 }
 
 button:hover {
@@ -258,21 +289,74 @@ button:hover {
     background: #0056b3;
 }
 
+.cancelar {
+
+    display: block;
+
+    width: 100%;
+
+    text-align: center;
+
+    padding: 14px;
+
+    background: #6c757d;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    margin-bottom: 15px;
+}
+
+.cancelar:hover {
+
+    background: #545b62;
+}
+
+.mensagem {
+
+    background: #d4edda;
+
+    color: #155724;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    margin-bottom: 20px;
+}
+
+.busca {
+
+    margin-top: 30px;
+}
+
+.table-container {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    margin-top: 30px;
+}
+
 table {
 
     width: 100%;
 
-    margin-top: 30px;
-
     border-collapse: collapse;
+
+    min-width: 700px;
 }
 
 table th,
 table td {
 
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
 
-    padding: 12px;
+    padding: 14px;
 
     text-align: left;
 }
@@ -280,6 +364,20 @@ table td {
 table th {
 
     background: #f0f0f0;
+}
+
+table tr:nth-child(even) {
+
+    background: #fafafa;
+}
+
+.editar {
+
+    color: #007bff;
+
+    text-decoration: none;
+
+    font-weight: bold;
 }
 
 .excluir {
@@ -291,31 +389,13 @@ table th {
     font-weight: bold;
 }
 
-.editar {
+.whatsapp {
 
-    color: blue;
+    color: green;
 
     text-decoration: none;
 
     font-weight: bold;
-}
-
-.mensagem {
-
-    background: #d4edda;
-
-    color: #155724;
-
-    padding: 12px;
-
-    border-radius: 5px;
-
-    margin-bottom: 20px;
-}
-
-.busca {
-
-    margin-top: 30px;
 }
 
 .sem-clientes {
@@ -325,6 +405,38 @@ table th {
     padding: 20px;
 
     color: #666;
+}
+
+@media (max-width: 768px) {
+
+    body {
+
+        padding: 10px;
+    }
+
+    .container {
+
+        padding: 15px;
+    }
+
+    h2 {
+
+        font-size: 24px;
+    }
+
+    input,
+    button {
+
+        font-size: 14px;
+    }
+
+    table th,
+    table td {
+
+        padding: 10px;
+
+        font-size: 14px;
+    }
 }
 
 </style>
@@ -345,9 +457,7 @@ table th {
 
 <?php endif; ?>
 
-<!-- =========================
-FORMULÁRIO
-========================= -->
+<!-- FORMULÁRIO -->
 
 <form method="POST">
 
@@ -393,10 +503,14 @@ FORMULÁRIO
 >
     Salvar Alterações
 </button>
-<button>
-    <a href="clientes.php">
-        Cancelar edição
-</button>
+
+<a
+    class="cancelar"
+    href="clientes.php"
+>
+    Cancelar edição
+</a>
+
 <?php else: ?>
 
 <button
@@ -410,9 +524,7 @@ FORMULÁRIO
 
 </form>
 
-<!-- =========================
-BUSCA
-========================= -->
+<!-- BUSCA -->
 
 <div class="busca">
 
@@ -433,9 +545,9 @@ BUSCA
 
 </div>
 
-<!-- =========================
-TABELA
-========================= -->
+<!-- TABELA -->
+
+<div class="table-container">
 
 <table>
 
@@ -473,6 +585,7 @@ TABELA
 |
 
 <a
+    class="whatsapp"
     target="_blank"
     href="https://wa.me/55<?= preg_replace('/[^0-9]/', '', $cliente["telefone"]) ?>?text=Olá%20<?= urlencode($cliente["nome"]) ?>"
 >
@@ -511,6 +624,8 @@ TABELA
 <?php endif; ?>
 
 </table>
+
+</div>
 
 </div>
 
