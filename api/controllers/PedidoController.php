@@ -42,7 +42,7 @@ class PedidoController {
 
             /* 2️⃣ Inserir item */
             $stmt = $pdo->prepare("
-                INSERT INTO pedido_itens (pedido_id, produto_id, quantidade)
+                INSERT INTO pedido_itens (pedido_id, produto_id, quantity)
                 VALUES (?, ?, ?)
             ");
             $stmt->execute([$pedido_id, $produto_id, $quantidade]);
@@ -99,7 +99,7 @@ class PedidoController {
     }
 
     /* ================================
-       📜 HISTÓRICO
+       📜 HISTÓRICO DO CLIENTE
     ================================== */
     public static function historico($pdo) {
 
@@ -146,6 +146,84 @@ class PedidoController {
                 "erro" => "Erro interno",
                 "detalhe" => $e->getMessage()
             ]);
+            
+        }
+    }
+
+    /* ========================================
+       📋 LISTAR TODOS OS PEDIDOS (DASHBOARD)
+    =========================================== */
+    public static function listarTodos($pdo) {
+        if ($_SERVER["REQUEST_METHOD"] !== "GET") {
+            http_response_code(405);
+            echo json_encode(["erro" => "Método não permitido"]);
+            return;
+        }
+
+        $status = $_GET["status"] ?? null;
+
+        try {
+            $sql = "
+                SELECT 
+                    p.id AS pedido_id,
+                    p.data AS data_pedido,
+                    p.status AS status_pedido,
+                    c.nome AS nome_cliente,
+                    c.telefone AS telefone_cliente,
+                    SUM(pi.quantidade) AS total_produtos
+                FROM pedidos p
+                JOIN clientes c ON p.cliente_id = c.id
+                LEFT JOIN pedido_itens pi ON pi.pedido_id = p.id
+            ";
+
+            if (in_array($status, ['Pendente', 'Concluido', 'Cancelado'])) {
+                $sql .= " WHERE p.status = :status ";
+            }
+
+            $sql .= " GROUP BY p.id ORDER BY p.id DESC ";
+
+            $stmt = $pdo->prepare($sql);
+            
+            if (in_array($status, ['Pendente', 'Concluido', 'Cancelado'])) {
+                $stmt->bindValue(':status', $status);
+            }
+
+            $stmt->execute();
+            $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode($resultado);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(["erro" => "Erro interno", "detalhe" => $e->getMessage()]);
+        }
+    }
+
+    public static function atualizarStatus($pdo) {
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            http_response_code(405);
+            echo json_encode(["erro" => "Método não permitido"]);
+            return;
+        }
+
+        $dados = json_decode(file_get_contents("php://input"), true);
+        $pedido_id = (int) ($dados["pedido_id"] ?? 0);
+        $novo_status = trim($dados["status"] ?? "");
+
+        if ($pedido_id <= 0 || !in_array($novo_status, ['Pendente', 'Concluido', 'Cancelado'])) {
+            http_response_code(400);
+            echo json_encode(["erro" => "Dados inválidos ou status incorreto"]);
+            return;
+        }
+
+        try {
+            $stmt = $pdo->prepare("UPDATE pedidos SET status = ? WHERE id = ?");
+            $stmt->execute([$novo_status, $pedido_id]);
+
+            echo json_encode(["sucesso" => true, "mensagem" => "Status atualizado com sucesso"]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(["erro" => "Erro interno", "detalhe" => $e->getMessage()]);
         }
     }
 }
